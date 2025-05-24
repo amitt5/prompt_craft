@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { ArrowLeft, Plus, X, Save, Send, Sparkles, BookTemplate, Loader2, Copy, Check, Clock, MessageSquare } from "lucide-react"
+import { ArrowLeft, Plus, X, Save, Send, Sparkles, BookTemplate, Loader2, Copy, Check, Clock, MessageSquare, Pencil } from "lucide-react"
 import { llms } from "@/app/data/llms"
 import { LLM, LLMId } from "@/app/types/llm"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -110,6 +110,8 @@ If you don't receive the email within a few minutes, please check your spam fold
   const [llmResponses, setLlmResponses] = useState<Record<LLMId, string>>({})
   const [finalResponse, setFinalResponse] = useState("")
   const [copiedLLM, setCopiedLLM] = useState<LLMId | null>(null)
+  const [isEditingTitle, setIsEditingTitle] = useState(false)
+  const [promptTitle, setPromptTitle] = useState(params.id === "new" ? "Prompt Name" : prompt.title)
 
   const addTag = () => {
     if (tagInput.trim() && !tags.includes(tagInput.trim())) {
@@ -232,6 +234,12 @@ Support: support@example.com`
     setTimeout(() => setCopiedLLM(null), 2000)
   }
 
+  const handleTitleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsEditingTitle(false)
+    // TODO: Save title to backend
+  }
+
   return (
     <div className="container py-6 space-y-6">
       <div className="flex items-center gap-4">
@@ -240,7 +248,27 @@ Support: support@example.com`
             <ArrowLeft className="h-4 w-4" />
           </a>
         </Button>
-        <h1 className="text-2xl font-bold tracking-tight">Create New Prompt</h1>
+        {isEditingTitle ? (
+          <form onSubmit={handleTitleSubmit} className="flex-1">
+            <Input
+              value={promptTitle}
+              onChange={(e) => setPromptTitle(e.target.value)}
+              onBlur={() => setIsEditingTitle(false)}
+              autoFocus
+              className="text-2xl font-bold tracking-tight h-10 px-2"
+            />
+          </form>
+        ) : (
+          <div 
+            className="flex-1 flex items-center gap-2 cursor-pointer group"
+            onClick={() => setIsEditingTitle(true)}
+          >
+            <h1 className="text-2xl font-bold tracking-tight text-muted-foreground group-hover:text-foreground transition-colors">
+              {promptTitle}
+            </h1>
+            <Pencil className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+          </div>
+        )}
         <div className="ml-auto flex items-center gap-2">
           <Button variant="outline">
             <Save className="mr-2 h-4 w-4" />
@@ -255,7 +283,7 @@ Support: support@example.com`
 
       <div className="grid gap-6 md:grid-cols-3">
         <div className="md:col-span-2 space-y-6">
-          <Card>
+          {/* <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-lg">Basic Information</CardTitle>
             </CardHeader>
@@ -302,7 +330,7 @@ Support: support@example.com`
                 </div>
               </div>
             </CardContent>
-          </Card>
+          </Card> */}
 
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList>
@@ -317,8 +345,23 @@ Support: support@example.com`
             <TabsContent value="components" className="space-y-6 pt-4">
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">Audience</CardTitle>
-                  <CardDescription>Define who will use this prompt</CardDescription>
+                  <CardTitle className="text-lg">Context</CardTitle>
+                  <CardDescription>Why are we doing this and for whom?</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Textarea
+                    placeholder="Describe the target audience for this prompt"
+                    rows={3}
+                    defaultValue="Customer support representatives who need to quickly generate accurate FAQ responses."
+                  />
+                </CardContent>
+              </Card>
+
+
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg">Role</CardTitle>
+                  <CardDescription>From which perspective will the AI be writing?</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Textarea
@@ -451,6 +494,22 @@ If you don't receive the email within a few minutes, please check your spam fold
                   />
                 </CardContent>
               </Card>
+
+
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg">Self Check</CardTitle>
+                  <CardDescription>Define who will use this prompt</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Textarea
+                    placeholder="Describe the target audience for this prompt"
+                    rows={3}
+                    defaultValue="Customer support representatives who need to quickly generate accurate FAQ responses."
+                  />
+                </CardContent>
+              </Card>
+
             </TabsContent>
             <TabsContent value="preview" className="pt-4">
               <Card>

@@ -8,7 +8,6 @@ export interface Prompt {
     instructions?: string;
     guidelines?: string[];
     guardrails?: string[];
-    outputInstructions?: string;
     outputFormat?: string;
     outputExample?: string;
     selfCheck?: string[];
