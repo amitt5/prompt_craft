@@ -95,8 +95,9 @@ If you don't receive the email within a few minutes, please check your spam fold
   }
 
   
-  const [tags, setTags] = useState<string[]>([])
-  const [tagInput, setTagInput] = useState("")
+  const [tags, setTags] = useState<string[]>(params.id === "new" ? [] : prompt.tags)
+  const [isAddingTag, setIsAddingTag] = useState(false)
+  const [newTag, setNewTag] = useState("")
   const [guidelines, setGuidelines] = useState<string[]>([
     "Use a friendly, helpful tone",
     "Keep responses concise but thorough",
@@ -113,15 +114,16 @@ If you don't receive the email within a few minutes, please check your spam fold
   const [isEditingTitle, setIsEditingTitle] = useState(false)
   const [promptTitle, setPromptTitle] = useState(params.id === "new" ? "Prompt Name" : prompt.title)
 
-  const addTag = () => {
-    if (tagInput.trim() && !tags.includes(tagInput.trim())) {
-      setTags([...tags, tagInput.trim()])
-      setTagInput("")
+  const handleAddTag = () => {
+    if (newTag.trim() && !tags.includes(newTag.trim())) {
+      setTags([...tags, newTag.trim()])
+      setNewTag("")
     }
+    setIsAddingTag(false)
   }
 
   const removeTag = (tagToRemove: string) => {
-    setTags(tags.filter((tag) => tag !== tagToRemove))
+    setTags(tags.filter(tag => tag !== tagToRemove))
   }
 
   const addGuideline = () => {
@@ -248,36 +250,85 @@ Support: support@example.com`
             <ArrowLeft className="h-4 w-4" />
           </a>
         </Button>
-        {isEditingTitle ? (
-          <form onSubmit={handleTitleSubmit} className="flex-1">
-            <Input
-              value={promptTitle}
-              onChange={(e) => setPromptTitle(e.target.value)}
-              onBlur={() => setIsEditingTitle(false)}
-              autoFocus
-              className="text-2xl font-bold tracking-tight h-10 px-2"
-            />
-          </form>
-        ) : (
-          <div 
-            className="flex-1 flex items-center gap-2 cursor-pointer group"
-            onClick={() => setIsEditingTitle(true)}
-          >
-            <h1 className="text-2xl font-bold tracking-tight text-muted-foreground group-hover:text-foreground transition-colors">
-              {promptTitle}
-            </h1>
-            <Pencil className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+        <div className="flex-1 flex items-center gap-4">
+          {isEditingTitle ? (
+            <form onSubmit={handleTitleSubmit} className="flex-1">
+              <Input
+                value={promptTitle}
+                onChange={(e) => setPromptTitle(e.target.value)}
+                onBlur={() => setIsEditingTitle(false)}
+                autoFocus
+                className="text-2xl font-bold tracking-tight h-10 px-2"
+              />
+            </form>
+          ) : (
+            <div 
+              className="flex-1 flex items-center gap-2 cursor-pointer group"
+              onClick={() => setIsEditingTitle(true)}
+            >
+              <h1 className="text-2xl font-bold tracking-tight text-muted-foreground group-hover:text-foreground transition-colors">
+                {promptTitle}
+              </h1>
+              <Pencil className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
+          )}
+          <div className="flex items-center gap-2">
+            {tags.map((tag) => (
+              <Badge 
+                key={tag} 
+                variant="secondary" 
+                className="flex items-center gap-1"
+              >
+                {tag}
+                <button
+                  type="button"
+                  onClick={() => removeTag(tag)}
+                  className="rounded-full hover:bg-muted p-0.5"
+                >
+                  <X className="h-3 w-3" />
+                  <span className="sr-only">Remove {tag}</span>
+                </button>
+              </Badge>
+            ))}
+            {isAddingTag ? (
+              <div className="flex items-center gap-2">
+                <Input
+                  value={newTag}
+                  onChange={(e) => setNewTag(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault()
+                      handleAddTag()
+                    }
+                  }}
+                  placeholder="Add tag..."
+                  className="h-7 w-24"
+                  autoFocus
+                  onBlur={handleAddTag}
+                />
+              </div>
+            ) : (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsAddingTag(true)}
+                className="h-7 px-2"
+              >
+                <Plus className="h-3 w-3 mr-1" />
+                Add Tag
+              </Button>
+            )}
           </div>
-        )}
+        </div>
         <div className="ml-auto flex items-center gap-2">
           <Button variant="outline">
             <Save className="mr-2 h-4 w-4" />
             Save Draft
           </Button>
-          <Button>
+          {/* <Button>
             <Send className="mr-2 h-4 w-4" />
             Submit for Review
-          </Button>
+          </Button> */}
         </div>
       </div>
 
