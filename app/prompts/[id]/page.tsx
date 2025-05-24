@@ -9,14 +9,92 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { ArrowLeft, Plus, X, Save, Send, Sparkles, BookTemplate, Loader2 } from "lucide-react"
+import { ArrowLeft, Plus, X, Save, Send, Sparkles, BookTemplate, Loader2, Copy, Check, Clock, MessageSquare } from "lucide-react"
 import { llms } from "@/app/data/llms"
 import { LLM, LLMId } from "@/app/types/llm"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
+import { toast } from "sonner"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
-export default function NewPromptPage() {
+export default function NewPromptPage({ params }: { params: { id: string } }) {
+
+  const prompt = {
+    id: 1,
+    // id: params.id,
+    title: "Customer Support FAQ Generator",
+    status: "Submitted",
+    tags: ["Support", "FAQ"],
+    createdBy: {
+      name: "John Doe",
+      email: "john@example.com",
+      avatar: "/placeholder.svg?height=40&width=40",
+    },
+    updatedAt: "2 hours ago",
+    components: [
+      {
+        type: "Audience",
+        content: "Customer support representatives who need to quickly generate accurate FAQ responses.",
+      },
+      {
+        type: "Task Instruction",
+        content: "Generate comprehensive FAQ answers for common customer support questions related to our product.",
+      },
+      {
+        type: "Guidelines",
+        content: [
+          "Use a friendly, helpful tone",
+          "Keep responses concise but thorough",
+          "Include relevant links to documentation when appropriate",
+          "Avoid technical jargon unless necessary",
+          "Format responses with clear headings and bullet points when needed",
+        ],
+      },
+      {
+        type: "Guardrails",
+        content: [
+          "Never make up information about product features",
+          "Don't provide specific pricing information unless explicitly included in the prompt",
+          "Avoid making promises about future features",
+          "Don't provide legal advice",
+        ],
+      },
+      {
+        type: "Output Format",
+        content:
+          "Structured FAQ response with a clear question heading, concise answer, and any relevant follow-up information or links.",
+      },
+      {
+        type: "Example",
+        content: `Q: How do I reset my password?
+
+A: To reset your password, please follow these steps:
+
+1. Click on the "Forgot Password" link on the login page
+2. Enter the email address associated with your account
+3. Check your email for a password reset link
+4. Click the link and follow the instructions to create a new password
+
+If you don't receive the email within a few minutes, please check your spam folder or contact support at support@example.com.`,
+      },
+    ],
+    reviews: [
+      {
+        id: 1,
+        reviewer: {
+          name: "Jane Smith",
+          avatar: "/placeholder.svg?height=40&width=40",
+        },
+        status: "Requested Changes",
+        comment:
+          "The guidelines need to be more specific about tone. Also, please add more examples for different types of questions.",
+        createdAt: "1 day ago",
+      },
+    ],
+  }
+
+  
   const [tags, setTags] = useState<string[]>([])
   const [tagInput, setTagInput] = useState("")
   const [guidelines, setGuidelines] = useState<string[]>([
@@ -30,6 +108,8 @@ export default function NewPromptPage() {
   const [selectedLLMs, setSelectedLLMs] = useState<LLMId[]>([])
   const [isExecuting, setIsExecuting] = useState(false)
   const [llmResponses, setLlmResponses] = useState<Record<LLMId, string>>({})
+  const [finalResponse, setFinalResponse] = useState("")
+  const [copiedLLM, setCopiedLLM] = useState<LLMId | null>(null)
 
   const addTag = () => {
     if (tagInput.trim() && !tags.includes(tagInput.trim())) {
@@ -144,6 +224,14 @@ Support: support@example.com`
     setActiveTab("response")
   }
 
+  const copyToFinalResponse = (llmId: LLMId) => {
+    setFinalResponse(llmResponses[llmId])
+    setCopiedLLM(llmId)
+    toast.success("Response copied to final response")
+    // Reset the copied state after 2 seconds
+    setTimeout(() => setCopiedLLM(null), 2000)
+  }
+
   return (
     <div className="container py-6 space-y-6">
       <div className="flex items-center gap-4">
@@ -222,7 +310,9 @@ Support: support@example.com`
               <TabsTrigger value="preview">Preview</TabsTrigger>
               <TabsTrigger value="execute">Execute</TabsTrigger>
               <TabsTrigger value="response">Response</TabsTrigger>
-              <TabsTrigger value="Review">Review</TabsTrigger>
+              <TabsTrigger value="review">Review</TabsTrigger>
+              <TabsTrigger value="history">History</TabsTrigger>
+              
             </TabsList>
             <TabsContent value="components" className="space-y-6 pt-4">
               <Card>
@@ -515,7 +605,27 @@ If you don't receive the email within a few minutes, please check your spam fold
                             <h3 className="font-medium">{llm?.name}</h3>
                             <p className="text-sm text-muted-foreground">{llm?.provider}</p>
                           </div>
-                          <Badge variant="outline">${llm?.costPer1KTokens}/1K tokens</Badge>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline">${llm?.costPer1KTokens}/1K tokens</Badge>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => copyToFinalResponse(llmId)}
+                              className="h-8"
+                            >
+                              {copiedLLM === llmId ? (
+                                <>
+                                  <Check className="mr-2 h-4 w-4" />
+                                  Copied
+                                </>
+                              ) : (
+                                <>
+                                  <Copy className="mr-2 h-4 w-4" />
+                                  Copy
+                                </>
+                              )}
+                            </Button>
+                          </div>
                         </div>
                         <div className="bg-muted p-4 rounded-md">
                           <pre className="whitespace-pre-wrap text-sm">{llmResponses[llmId]}</pre>
@@ -523,20 +633,171 @@ If you don't receive the email within a few minutes, please check your spam fold
                       </div>
                     )
                   })}
+
+                  <div className="space-y-4 pt-6 border-t">
+                    <div>
+                      <h3 className="font-medium mb-2">Final Response</h3>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Select and edit your preferred response from above, or write your own
+                      </p>
+                      <Textarea
+                        value={finalResponse}
+                        onChange={(e) => setFinalResponse(e.target.value)}
+                        placeholder="Your final response will appear here..."
+                        className="min-h-[200px] font-mono"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end pt-4">
+                    <Button
+                      onClick={() => {
+                        // TODO: Implement submit for review logic
+                        toast.success("Response submitted for review")
+                      }}
+                      disabled={!finalResponse.trim()}
+                    >
+                      <Send className="mr-2 h-4 w-4" />
+                      Submit for Review
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
-            <TabsContent value="Review" className="pt-4">
+            
+            <TabsContent value="review" className="space-y-6 pt-4">
               <Card>
-                <CardHeader>
-                  <CardTitle>Review Prompt</CardTitle>
-                  <CardDescription>This is how your prompt will appear when used</CardDescription>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg">Review Status</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="bg-muted p-4 rounded-md space-y-4">
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-5 w-5 text-amber-500" />
+                      <div>
+                        <p className="font-medium">Awaiting Approval</p>
+                        <p className="text-sm text-muted-foreground">Submitted 1 day ago</p>
+                      </div>
+                    </div>
+                    <Separator orientation="vertical" className="h-10" />
                     <div>
-                      <h3 className="font-medium">Audience:</h3>
-                      <p>Customer support representatives who need to quickly generate accurate FAQ responses.</p>
+                      <p className="text-sm font-medium">Reviewer</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Avatar className="h-6 w-6">
+                          <AvatarImage
+                            src={prompt.reviews[0].reviewer.avatar || "/placeholder.svg"}
+                            alt={prompt.reviews[0].reviewer.name}
+                          />
+                          <AvatarFallback>{prompt.reviews[0].reviewer.name.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <span className="text-sm">{prompt.reviews[0].reviewer.name}</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <div className="space-y-4">
+                {prompt.reviews.map((review) => (
+                  <Card key={review.id}>
+                    <CardContent className="pt-6">
+                      <div className="flex items-start gap-4">
+                        <Avatar>
+                          <AvatarImage src={review.reviewer.avatar || "/placeholder.svg"} alt={review.reviewer.name} />
+                          <AvatarFallback>{review.reviewer.name.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium">{review.reviewer.name}</p>
+                              <p className="text-sm text-muted-foreground">{review.createdAt}</p>
+                            </div>
+                            <Badge variant="secondary">{review.status}</Badge>
+                          </div>
+                          <div className="mt-2 space-y-2">
+                            <p>{review.comment}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg">Add Comment</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-start gap-4">
+                    <Avatar>
+                      <AvatarImage src={prompt.createdBy.avatar || "/placeholder.svg"} alt={prompt.createdBy.name} />
+                      <AvatarFallback>{prompt.createdBy.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <textarea
+                        className="w-full min-h-[100px] p-2 border rounded-md"
+                        placeholder="Add your comment..."
+                      ></textarea>
+                      <div className="flex justify-end mt-2">
+                        <Button>
+                          <MessageSquare className="mr-2 h-4 w-4" />
+                          Add Comment
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            <TabsContent value="history" className="space-y-6 pt-4">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg">Version History</CardTitle>
+                  <CardDescription>Track changes to this prompt over time</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-4">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full border">
+                        <span className="text-sm font-medium">3</span>
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <p className="font-medium">Current Version</p>
+                          <p className="text-sm text-muted-foreground">2 hours ago</p>
+                        </div>
+                        <p className="text-sm text-muted-foreground">Updated by {prompt.createdBy.name}</p>
+                        <p className="text-sm mt-1">Added more specific guardrails and updated example</p>
+                      </div>
+                    </div>
+                    <Separator />
+                    <div className="flex items-start gap-4">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full border">
+                        <span className="text-sm font-medium">2</span>
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <p className="font-medium">Submitted for Review</p>
+                          <p className="text-sm text-muted-foreground">1 day ago</p>
+                        </div>
+                        <p className="text-sm text-muted-foreground">Updated by {prompt.createdBy.name}</p>
+                        <p className="text-sm mt-1">Refined guidelines and added output format</p>
+                      </div>
+                    </div>
+                    <Separator />
+                    <div className="flex items-start gap-4">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full border">
+                        <span className="text-sm font-medium">1</span>
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <p className="font-medium">Initial Draft</p>
+                          <p className="text-sm text-muted-foreground">3 days ago</p>
+                        </div>
+                        <p className="text-sm text-muted-foreground">Created by {prompt.createdBy.name}</p>
+                        <p className="text-sm mt-1">Created initial prompt structure</p>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
