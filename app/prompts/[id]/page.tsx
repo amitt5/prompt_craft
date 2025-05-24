@@ -21,6 +21,7 @@ export default function NewPromptPage() {
   const [guidelineInput, setGuidelineInput] = useState("")
   const [guardrails, setGuardrails] = useState<string[]>(["Never make up information about product features"])
   const [guardrailInput, setGuardrailInput] = useState("")
+  const [activeTab, setActiveTab] = useState("components")
 
   const addTag = () => {
     if (tagInput.trim() && !tags.includes(tagInput.trim())) {
@@ -89,12 +90,7 @@ export default function NewPromptPage() {
                 </label>
                 <Input id="title" placeholder="Enter prompt title" />
               </div>
-              <div>
-                <label htmlFor="description" className="block text-sm font-medium mb-1">
-                  Description
-                </label>
-                <Textarea id="description" placeholder="Brief description of what this prompt does" rows={3} />
-              </div>
+              
               <div>
                 <label className="block text-sm font-medium mb-1">Tags</label>
                 <div className="flex flex-wrap gap-1 mb-2">
@@ -132,10 +128,12 @@ export default function NewPromptPage() {
             </CardContent>
           </Card>
 
-          <Tabs defaultValue="components">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList>
               <TabsTrigger value="components">Prompt Components</TabsTrigger>
               <TabsTrigger value="preview">Preview</TabsTrigger>
+              <TabsTrigger value="execute">Execute</TabsTrigger>
+              <TabsTrigger value="Review">Review</TabsTrigger>
             </TabsList>
             <TabsContent value="components" className="space-y-6 pt-4">
               <Card>
@@ -321,15 +319,53 @@ If you don't receive the email within a few minutes, please check your spam fold
                       <pre className="bg-background p-3 rounded-md text-sm whitespace-pre-wrap">
                         {`Q: How do I reset my password?
 
-A: To reset your password, please follow these steps:
+  A: To reset your password, please follow these steps:
 
-1. Click on the "Forgot Password" link on the login page
-2. Enter the email address associated with your account
-3. Check your email for a password reset link
-4. Click the link and follow the instructions to create a new password
+  1. Click on the "Forgot Password" link on the login page
+  2. Enter the email address associated with your account
+  3. Check your email for a password reset link
+  4. Click the link and follow the instructions to create a new password
 
-If you don't receive the email within a few minutes, please check your spam folder or contact support at support@example.com.`}
+  If you don't receive the email within a few minutes, please check your spam folder or contact support at support@example.com.`}
                       </pre>
+                    </div>
+                  </div>
+                </CardContent>
+                <CardContent className="flex justify-end pt-4">
+                  <Button onClick={() => setActiveTab("execute")}>
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    Save and Run with LLMs
+                  </Button>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            <TabsContent value="execute" className="pt-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Execute Prompt</CardTitle>
+                  <CardDescription>This is how your prompt will appear when used</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="bg-muted p-4 rounded-md space-y-4">
+                    <div>
+                      <h3 className="font-medium">Audience:</h3>
+                      <p>Customer support representatives who need to quickly generate accurate FAQ responses.</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            <TabsContent value="Review" className="pt-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Review Prompt</CardTitle>
+                  <CardDescription>This is how your prompt will appear when used</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="bg-muted p-4 rounded-md space-y-4">
+                    <div>
+                      <h3 className="font-medium">Audience:</h3>
+                      <p>Customer support representatives who need to quickly generate accurate FAQ responses.</p>
                     </div>
                   </div>
                 </CardContent>

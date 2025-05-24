@@ -1,4 +1,4 @@
-import { Prompt } from '@/utils/types';
+import { Prompt, Llm } from '@/utils/types';
 
 export const promptsData: Prompt[] = [
   {
@@ -51,3 +51,16 @@ export const promptsData: Prompt[] = [
     updatedAt: "2 weeks ago",
   },
 ]; 
+
+export const llms: Llm[] = [
+  { id: 101, name: "GPT-4 Turbo" },
+  { id: 102, name: "Claude 3 Opus" },
+  { id: 103, name: "Claude 3 Sonnet" },
+  { id: 104, name: "Gemini 1.5 Pro" },
+  { id: 105, name: "Mistral Large" },
+  { id: 106, name: "Mixtral 8x7B" },
+  { id: 107, name: "Command R+" },
+  { id: 108, name: "LLaMA 3 70B" },
+  { id: 109, name: "Yi-34B" },
+  { id: 110, name: "Zephyr" }
+];
