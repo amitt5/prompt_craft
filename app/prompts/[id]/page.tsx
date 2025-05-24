@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { ArrowLeft, Plus, X, Save, Send, Sparkles, BookTemplate } from "lucide-react"
+import { ArrowLeft, Plus, X, Save, Send, Sparkles, BookTemplate, Loader2 } from "lucide-react"
 import { llms } from "@/app/data/llms"
 import { LLM, LLMId } from "@/app/types/llm"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -28,6 +28,8 @@ export default function NewPromptPage() {
   const [guardrailInput, setGuardrailInput] = useState("")
   const [activeTab, setActiveTab] = useState("components")
   const [selectedLLMs, setSelectedLLMs] = useState<LLMId[]>([])
+  const [isExecuting, setIsExecuting] = useState(false)
+  const [llmResponses, setLlmResponses] = useState<Record<LLMId, string>>({})
 
   const addTag = () => {
     if (tagInput.trim() && !tags.includes(tagInput.trim())) {
@@ -72,6 +74,74 @@ export default function NewPromptPage() {
       }
       return [...prev, llmId]
     })
+  }
+
+  const executePrompt = async () => {
+    setIsExecuting(true)
+    // Simulate API calls to different LLMs
+    const mockResponses: Record<LLMId, string> = {
+      "gpt-4": `Here's a comprehensive FAQ response:
+
+Q: How do I reset my password?
+
+A: To reset your password, please follow these steps:
+
+1. Click on the "Forgot Password" link on the login page
+2. Enter the email address associated with your account
+3. Check your email for a password reset link
+4. Click the link and follow the instructions to create a new password
+
+If you don't receive the email within a few minutes, please check your spam folder or contact support at support@example.com.`,
+      "gpt-3.5-turbo": `To reset your password:
+
+1. Go to login page
+2. Click "Forgot Password"
+3. Enter your email
+4. Check email for reset link
+5. Create new password
+
+Need help? Contact support.`,
+      "claude-3-opus": `Password Reset Instructions:
+
+1. Navigate to the login page
+2. Locate and click the "Forgot Password" link
+3. Enter your registered email address
+4. Wait for the password reset email (usually arrives within 2-3 minutes)
+5. Open the email and click the reset link
+6. Create a new strong password following our security guidelines
+
+Note: If you don't receive the email, please check your spam folder or contact our support team at support@example.com for assistance.`,
+      "claude-3-sonnet": `Password Reset Process:
+
+1. Visit login page
+2. Click "Forgot Password"
+3. Enter email
+4. Check inbox for reset link
+5. Set new password
+
+Contact support if you need help.`,
+      "gemini-pro": `Reset Password Steps:
+
+1. Go to login
+2. Click forgot password
+3. Enter email
+4. Check email for link
+5. Set new password
+
+Support: support@example.com`
+    }
+
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 2000))
+    
+    const responses: Record<LLMId, string> = {}
+    selectedLLMs.forEach(llmId => {
+      responses[llmId] = mockResponses[llmId]
+    })
+    
+    setLlmResponses(responses)
+    setIsExecuting(false)
+    setActiveTab("response")
   }
 
   return (
@@ -151,6 +221,7 @@ export default function NewPromptPage() {
               <TabsTrigger value="components">Prompt Components</TabsTrigger>
               <TabsTrigger value="preview">Preview</TabsTrigger>
               <TabsTrigger value="execute">Execute</TabsTrigger>
+              <TabsTrigger value="response">Response</TabsTrigger>
               <TabsTrigger value="Review">Review</TabsTrigger>
             </TabsList>
             <TabsContent value="components" className="space-y-6 pt-4">
@@ -399,13 +470,20 @@ If you don't receive the email within a few minutes, please check your spam fold
                   {selectedLLMs.length > 0 && (
                     <div className="flex justify-end">
                       <Button
-                        onClick={() => {
-                          // TODO: Implement execution logic
-                          console.log("Executing with LLMs:", selectedLLMs)
-                        }}
+                        onClick={executePrompt}
+                        disabled={isExecuting}
                       >
-                        <Sparkles className="mr-2 h-4 w-4" />
-                        Execute with {selectedLLMs.length} LLM{selectedLLMs.length > 1 ? "s" : ""}
+                        {isExecuting ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Executing...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="mr-2 h-4 w-4" />
+                            Execute with {selectedLLMs.length} LLM{selectedLLMs.length > 1 ? "s" : ""}
+                          </>
+                        )}
                       </Button>
                     </div>
                   )}
@@ -418,6 +496,33 @@ If you don't receive the email within a few minutes, please check your spam fold
                       </AlertDescription>
                     </Alert>
                   )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+            <TabsContent value="response" className="pt-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>LLM Responses</CardTitle>
+                  <CardDescription>Responses from the selected LLMs</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {selectedLLMs.map((llmId) => {
+                    const llm = llms.find(l => l.id === llmId)
+                    return (
+                      <div key={llmId} className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h3 className="font-medium">{llm?.name}</h3>
+                            <p className="text-sm text-muted-foreground">{llm?.provider}</p>
+                          </div>
+                          <Badge variant="outline">${llm?.costPer1KTokens}/1K tokens</Badge>
+                        </div>
+                        <div className="bg-muted p-4 rounded-md">
+                          <pre className="whitespace-pre-wrap text-sm">{llmResponses[llmId]}</pre>
+                        </div>
+                      </div>
+                    )
+                  })}
                 </CardContent>
               </Card>
             </TabsContent>
