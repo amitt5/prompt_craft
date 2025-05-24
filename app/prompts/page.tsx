@@ -8,63 +8,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { PlusCircle, Search, Filter, MoreHorizontal, Copy, Pencil, Trash, Eye } from "lucide-react"
+import { promptsData } from "@/utils/sampleData"
+import { Prompt, PromptStatus } from "@/utils/types"
 
 export default function PromptsPage() {
-  // Mock data for prompts
-  const promptsData = [
-    {
-      id: 1,
-      title: "Customer Support FAQ Generator",
-      status: "Draft",
-      tags: ["Support", "FAQ"],
-      updatedAt: "2 hours ago",
-    },
-    {
-      id: 2,
-      title: "Product Description Writer",
-      status: "Submitted",
-      tags: ["Marketing", "Product"],
-      updatedAt: "1 day ago",
-    },
-    {
-      id: 3,
-      title: "Social Media Post Creator",
-      status: "Approved",
-      tags: ["Social", "Marketing"],
-      updatedAt: "3 days ago",
-    },
-    {
-      id: 4,
-      title: "Email Subject Line Generator",
-      status: "Draft",
-      tags: ["Email", "Marketing"],
-      updatedAt: "5 days ago",
-    },
-    {
-      id: 5,
-      title: "Blog Post Outline Creator",
-      status: "Approved",
-      tags: ["Content", "Blog"],
-      updatedAt: "1 week ago",
-    },
-    {
-      id: 6,
-      title: "SEO Meta Description Generator",
-      status: "Submitted",
-      tags: ["SEO", "Marketing"],
-      updatedAt: "1 week ago",
-    },
-    {
-      id: 7,
-      title: "Customer Testimonial Formatter",
-      status: "Approved",
-      tags: ["Marketing", "Testimonial"],
-      updatedAt: "2 weeks ago",
-    },
-  ]
-
   const [searchQuery, setSearchQuery] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
+  const [statusFilter, setStatusFilter] = useState<PromptStatus | "all">("all")
   const [tagFilter, setTagFilter] = useState("all")
 
   // Filter prompts based on search query and filters
@@ -102,7 +51,10 @@ export default function PromptsPage() {
         </div>
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-2">
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <Select 
+              value={statusFilter} 
+              onValueChange={(value: PromptStatus | "all") => setStatusFilter(value)}
+            >
               <SelectTrigger className="w-[130px]">
                 <Filter className="mr-2 h-4 w-4" />
                 <SelectValue placeholder="Status" />
