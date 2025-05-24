@@ -10,6 +10,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { ArrowLeft, Plus, X, Save, Send, Sparkles, BookTemplate } from "lucide-react"
+import { llms } from "@/app/data/llms"
+import { LLM, LLMId } from "@/app/types/llm"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { AlertCircle } from "lucide-react"
 
 export default function NewPromptPage() {
   const [tags, setTags] = useState<string[]>([])
@@ -22,6 +27,7 @@ export default function NewPromptPage() {
   const [guardrails, setGuardrails] = useState<string[]>(["Never make up information about product features"])
   const [guardrailInput, setGuardrailInput] = useState("")
   const [activeTab, setActiveTab] = useState("components")
+  const [selectedLLMs, setSelectedLLMs] = useState<LLMId[]>([])
 
   const addTag = () => {
     if (tagInput.trim() && !tags.includes(tagInput.trim())) {
@@ -54,6 +60,18 @@ export default function NewPromptPage() {
 
   const removeGuardrail = (index: number) => {
     setGuardrails(guardrails.filter((_, i) => i !== index))
+  }
+
+  const handleLLMSelection = (llmId: LLMId) => {
+    setSelectedLLMs(prev => {
+      if (prev.includes(llmId)) {
+        return prev.filter(id => id !== llmId)
+      }
+      if (prev.length >= 3) {
+        return prev
+      }
+      return [...prev, llmId]
+    })
   }
 
   return (
@@ -343,15 +361,63 @@ If you don't receive the email within a few minutes, please check your spam fold
               <Card>
                 <CardHeader>
                   <CardTitle>Execute Prompt</CardTitle>
-                  <CardDescription>This is how your prompt will appear when used</CardDescription>
+                  <CardDescription>Select up to 3 LLMs to run your prompt</CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <div className="bg-muted p-4 rounded-md space-y-4">
-                    <div>
-                      <h3 className="font-medium">Audience:</h3>
-                      <p>Customer support representatives who need to quickly generate accurate FAQ responses.</p>
-                    </div>
+                <CardContent className="space-y-6">
+                  <div className="grid gap-4">
+                    {llms.map((llm) => (
+                      <div
+                        key={llm.id}
+                        className={`flex items-start space-x-4 p-4 rounded-lg border ${
+                          selectedLLMs.includes(llm.id) ? "border-primary" : "border-border"
+                        }`}
+                      >
+                        <Checkbox
+                          id={llm.id}
+                          checked={selectedLLMs.includes(llm.id)}
+                          onCheckedChange={() => handleLLMSelection(llm.id)}
+                          disabled={!selectedLLMs.includes(llm.id) && selectedLLMs.length >= 3}
+                        />
+                        <div className="space-y-1">
+                          <label
+                            htmlFor={llm.id}
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          >
+                            {llm.name}
+                          </label>
+                          <p className="text-sm text-muted-foreground">{llm.description}</p>
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                            <span>Provider: {llm.provider}</span>
+                            <span>Max Tokens: {llm.maxTokens.toLocaleString()}</span>
+                            <span>Cost: ${llm.costPer1KTokens}/1K tokens</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
+
+                  {selectedLLMs.length > 0 && (
+                    <div className="flex justify-end">
+                      <Button
+                        onClick={() => {
+                          // TODO: Implement execution logic
+                          console.log("Executing with LLMs:", selectedLLMs)
+                        }}
+                      >
+                        <Sparkles className="mr-2 h-4 w-4" />
+                        Execute with {selectedLLMs.length} LLM{selectedLLMs.length > 1 ? "s" : ""}
+                      </Button>
+                    </div>
+                  )}
+
+                  {selectedLLMs.length === 0 && (
+                    <Alert>
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription>
+                        Please select at least one LLM to execute your prompt
+                      </AlertDescription>
+                    </Alert>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
