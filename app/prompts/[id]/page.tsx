@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { ArrowLeft, Plus, X, Save, Send, Sparkles, BookTemplate, Loader2, Copy, Check, Clock, MessageSquare, Pencil } from "lucide-react"
+import { ArrowLeft, Plus, X, Save, Send, Sparkles, BookTemplate, Loader2, Copy, Check, Clock, MessageSquare, Pencil, ChevronDown, ChevronUp } from "lucide-react"
 import { llms } from "@/app/data/llms"
 import { LLM, LLMId } from "@/app/types/llm"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -115,6 +115,16 @@ If you don't receive the email within a few minutes, please check your spam fold
   const [copiedLLM, setCopiedLLM] = useState<LLMId | null>(null)
   const [isEditingTitle, setIsEditingTitle] = useState(false)
   const [promptTitle, setPromptTitle] = useState(id === "new" ? "Prompt Name" : prompt.title)
+  const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({
+    context: true,
+    role: true,
+    taskInstruction: true,
+    guidelines: true,
+    guardrails: true,
+    outputFormat: true,
+    example: true,
+    selfCheck: true
+  })
 
   const handleAddTag = () => {
     if (newTag.trim() && !tags.includes(newTag.trim())) {
@@ -242,6 +252,13 @@ Support: support@example.com`
     e.preventDefault()
     setIsEditingTitle(false)
     // TODO: Save title to backend
+  }
+
+  const toggleCard = (cardId: string) => {
+    setExpandedCards(prev => ({
+      ...prev,
+      [cardId]: !prev[cardId]
+    }))
   }
 
   return (
@@ -398,171 +415,225 @@ Support: support@example.com`
             <TabsContent value="components" className="space-y-6 pt-4">
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">Context</CardTitle>
-                  <CardDescription>Why are we doing this and for whom?</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Textarea
-                    placeholder="Describe the target audience for this prompt"
-                    rows={3}
-                    defaultValue="Customer support representatives who need to quickly generate accurate FAQ responses."
-                  />
-                </CardContent>
-              </Card>
-
-
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">Role</CardTitle>
-                  <CardDescription>From which perspective will the AI be writing?</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Textarea
-                    placeholder="Describe the target audience for this prompt"
-                    rows={3}
-                    defaultValue="Customer support representatives who need to quickly generate accurate FAQ responses."
-                  />
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">Task Instruction</CardTitle>
-                  <CardDescription>What should the AI do?</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Textarea
-                    placeholder="Provide clear instructions for the AI"
-                    rows={3}
-                    defaultValue="Generate comprehensive FAQ answers for common customer support questions related to our product."
-                  />
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">Guidelines</CardTitle>
-                  <CardDescription>Best practices for the AI to follow</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <ul className="space-y-2">
-                    {guidelines.map((guideline, index) => (
-                      <li key={index} className="flex items-center gap-2">
-                        <div className="flex-1 bg-muted p-2 rounded-md">{guideline}</div>
-                        <Button variant="ghost" size="icon" onClick={() => removeGuideline(index)} className="h-8 w-8">
-                          <X className="h-4 w-4" />
-                          <span className="sr-only">Remove</span>
-                        </Button>
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Add a guideline"
-                      value={guidelineInput}
-                      onChange={(e) => setGuidelineInput(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault()
-                          addGuideline()
-                        }
-                      }}
-                    />
-                    <Button type="button" size="sm" onClick={addGuideline}>
-                      Add
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-lg">Context</CardTitle>
+                      <CardDescription>Why are we doing this and for whom?</CardDescription>
+                    </div>
+                    <Button variant="ghost" size="icon" onClick={() => toggleCard('context')}>
+                      {expandedCards.context ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                     </Button>
                   </div>
-                </CardContent>
+                </CardHeader>
+                {expandedCards.context && (
+                  <CardContent>
+                    <Textarea
+                      placeholder="Describe the target audience for this prompt"
+                      rows={3}
+                    />
+                  </CardContent>
+                )}
               </Card>
 
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">Guardrails</CardTitle>
-                  <CardDescription>Constraints and limitations for the AI</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <ul className="space-y-2">
-                    {guardrails.map((guardrail, index) => (
-                      <li key={index} className="flex items-center gap-2">
-                        <div className="flex-1 bg-muted p-2 rounded-md">{guardrail}</div>
-                        <Button variant="ghost" size="icon" onClick={() => removeGuardrail(index)} className="h-8 w-8">
-                          <X className="h-4 w-4" />
-                          <span className="sr-only">Remove</span>
-                        </Button>
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Add a guardrail"
-                      value={guardrailInput}
-                      onChange={(e) => setGuardrailInput(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault()
-                          addGuardrail()
-                        }
-                      }}
-                    />
-                    <Button type="button" size="sm" onClick={addGuardrail}>
-                      Add
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-lg">Role</CardTitle>
+                      <CardDescription>From which perspective will the AI be writing?</CardDescription>
+                    </div>
+                    <Button variant="ghost" size="icon" onClick={() => toggleCard('role')}>
+                      {expandedCards.role ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                     </Button>
                   </div>
-                </CardContent>
+                </CardHeader>
+                {expandedCards.role && (
+                  <CardContent>
+                    <Textarea
+                      placeholder="Describe the AI's role and perspective"
+                      rows={3}
+                    />
+                  </CardContent>
+                )}
               </Card>
 
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">Output Format</CardTitle>
-                  <CardDescription>How should the AI structure its response?</CardDescription>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-lg">Task Instruction</CardTitle>
+                      <CardDescription>What should the AI do?</CardDescription>
+                    </div>
+                    <Button variant="ghost" size="icon" onClick={() => toggleCard('taskInstruction')}>
+                      {expandedCards.taskInstruction ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </Button>
+                  </div>
                 </CardHeader>
-                <CardContent>
-                  <Textarea
-                    placeholder="Describe the desired output format"
-                    rows={3}
-                    defaultValue="Structured FAQ response with a clear question heading, concise answer, and any relevant follow-up information or links."
-                  />
-                </CardContent>
+                {expandedCards.taskInstruction && (
+                  <CardContent>
+                    <Textarea
+                      placeholder="Provide clear instructions for the AI"
+                      rows={3}
+                    />
+                  </CardContent>
+                )}
               </Card>
 
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">Example</CardTitle>
-                  <CardDescription>Provide an example of the expected output</CardDescription>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-lg">Guidelines</CardTitle>
+                      <CardDescription>Best practices for the AI to follow</CardDescription>
+                    </div>
+                    <Button variant="ghost" size="icon" onClick={() => toggleCard('guidelines')}>
+                      {expandedCards.guidelines ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </Button>
+                  </div>
                 </CardHeader>
-                <CardContent>
-                  <Textarea
-                    placeholder="Add an example of the expected output"
-                    rows={6}
-                    defaultValue={`Q: How do I reset my password?
-
-A: To reset your password, please follow these steps:
-
-1. Click on the "Forgot Password" link on the login page
-2. Enter the email address associated with your account
-3. Check your email for a password reset link
-4. Click the link and follow the instructions to create a new password
-
-If you don't receive the email within a few minutes, please check your spam folder or contact support at support@example.com.`}
-                  />
-                </CardContent>
+                {expandedCards.guidelines && (
+                  <CardContent className="space-y-4">
+                    <ul className="space-y-2">
+                      {guidelines.map((guideline, index) => (
+                        <li key={index} className="flex items-center gap-2">
+                          <div className="flex-1 bg-muted p-2 rounded-md">{guideline}</div>
+                          <Button variant="ghost" size="icon" onClick={() => removeGuideline(index)} className="h-8 w-8">
+                            <X className="h-4 w-4" />
+                            <span className="sr-only">Remove</span>
+                          </Button>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Add a guideline"
+                        value={guidelineInput}
+                        onChange={(e) => setGuidelineInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault()
+                            addGuideline()
+                          }
+                        }}
+                      />
+                      <Button type="button" size="sm" onClick={addGuideline}>
+                        Add
+                      </Button>
+                    </div>
+                  </CardContent>
+                )}
               </Card>
-
 
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">Self Check</CardTitle>
-                  <CardDescription>Define who will use this prompt</CardDescription>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-lg">Guardrails</CardTitle>
+                      <CardDescription>Constraints and limitations for the AI</CardDescription>
+                    </div>
+                    <Button variant="ghost" size="icon" onClick={() => toggleCard('guardrails')}>
+                      {expandedCards.guardrails ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </Button>
+                  </div>
                 </CardHeader>
-                <CardContent>
-                  <Textarea
-                    placeholder="Describe the target audience for this prompt"
-                    rows={3}
-                    defaultValue="Customer support representatives who need to quickly generate accurate FAQ responses."
-                  />
-                </CardContent>
+                {expandedCards.guardrails && (
+                  <CardContent className="space-y-4">
+                    <ul className="space-y-2">
+                      {guardrails.map((guardrail, index) => (
+                        <li key={index} className="flex items-center gap-2">
+                          <div className="flex-1 bg-muted p-2 rounded-md">{guardrail}</div>
+                          <Button variant="ghost" size="icon" onClick={() => removeGuardrail(index)} className="h-8 w-8">
+                            <X className="h-4 w-4" />
+                            <span className="sr-only">Remove</span>
+                          </Button>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Add a guardrail"
+                        value={guardrailInput}
+                        onChange={(e) => setGuardrailInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault()
+                            addGuardrail()
+                          }
+                        }}
+                      />
+                      <Button type="button" size="sm" onClick={addGuardrail}>
+                        Add
+                      </Button>
+                    </div>
+                  </CardContent>
+                )}
               </Card>
 
+              <Card>
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-lg">Output Format</CardTitle>
+                      <CardDescription>How should the AI structure its response?</CardDescription>
+                    </div>
+                    <Button variant="ghost" size="icon" onClick={() => toggleCard('outputFormat')}>
+                      {expandedCards.outputFormat ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                </CardHeader>
+                {expandedCards.outputFormat && (
+                  <CardContent>
+                    <Textarea
+                      placeholder="Describe the desired output format"
+                      rows={3}
+                    />
+                  </CardContent>
+                )}
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-lg">Example</CardTitle>
+                      <CardDescription>Provide an example of the expected output</CardDescription>
+                    </div>
+                    <Button variant="ghost" size="icon" onClick={() => toggleCard('example')}>
+                      {expandedCards.example ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                </CardHeader>
+                {expandedCards.example && (
+                  <CardContent>
+                    <Textarea
+                      placeholder="Add an example of the expected output"
+                      rows={6}
+                    />
+                  </CardContent>
+                )}
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-lg">Self Check</CardTitle>
+                      <CardDescription>Define who will use this prompt</CardDescription>
+                    </div>
+                    <Button variant="ghost" size="icon" onClick={() => toggleCard('selfCheck')}>
+                      {expandedCards.selfCheck ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                </CardHeader>
+                {expandedCards.selfCheck && (
+                  <CardContent>
+                    <Textarea
+                      placeholder="Describe the target audience for this prompt"
+                      rows={3}
+                    />
+                  </CardContent>
+                )}
+              </Card>
             </TabsContent>
             <TabsContent value="preview" className="pt-4">
               <Card>
