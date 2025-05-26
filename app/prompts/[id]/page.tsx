@@ -115,13 +115,13 @@ If you don't receive the email within a few minutes, please check your spam fold
   const [promptTitle, setPromptTitle] = useState(id === "new" ? "Prompt Name" : prompt.title)
   const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({
     context: true,
-    role: true,
-    taskInstruction: true,
-    guidelines: true,
-    guardrails: true,
-    outputFormat: true,
-    example: true,
-    selfCheck: true
+    role: false,
+    taskInstruction: false,
+    guidelines: false,
+    guardrails: false,
+    outputFormat: false,
+    example: false,
+    selfCheck: false
   })
 
   // Add state for role search
