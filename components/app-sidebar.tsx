@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
 import { ModeToggle } from "@/components/mode-toggle"
+import Link from "next/link"
 
 export function AppSidebar() {
   const pathname = usePathname()
@@ -79,10 +80,12 @@ export function AppSidebar() {
           </div>
         </div>
         <div className="mt-4 px-2">
-          <Button className="w-full justify-start gap-2 bg-primary hover:bg-primary/90" size="sm">
-            <PlusCircle className="h-4 w-4" />
-            <span>New Prompt</span>
-          </Button>
+          <Link href="/prompts/new" className="w-full">
+            <Button className="w-full justify-start gap-2 bg-primary hover:bg-primary/90" size="sm">
+              <PlusCircle className="h-4 w-4" />
+              <span className="text-white">New Prompt</span>
+            </Button>
+          </Link>
         </div>
         <div className="mt-2 px-2">
           <SidebarInput placeholder="Search..." />

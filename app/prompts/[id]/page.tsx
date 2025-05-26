@@ -21,7 +21,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 export default function NewPromptPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)  // ✅ unwrap the promise
 
-
   const prompt = {
     id: 1,
     // id: id,
@@ -95,7 +94,6 @@ If you don't receive the email within a few minutes, please check your spam fold
       },
     ],
   }
-
   
   const [tags, setTags] = useState<string[]>(id === "new" ? [] : prompt.tags)
   const [isAddingTag, setIsAddingTag] = useState(false)
@@ -117,13 +115,13 @@ If you don't receive the email within a few minutes, please check your spam fold
   const [promptTitle, setPromptTitle] = useState(id === "new" ? "Prompt Name" : prompt.title)
   const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({
     context: true,
-    role: false,
-    taskInstruction: false,
-    guidelines: false,
-    guardrails: false,
-    outputFormat: false,
-    example: false,
-    selfCheck: false
+    role: true,
+    taskInstruction: true,
+    guidelines: true,
+    guardrails: true,
+    outputFormat: true,
+    example: true,
+    selfCheck: true
   })
 
   // Add state for role search

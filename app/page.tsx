@@ -49,7 +49,7 @@ export default function Dashboard() {
           </Button>
           <Button size="sm" className="bg-primary hover:bg-primary/90">
             <Zap className="mr-2 h-4 w-4" />
-            New Prompt
+            New Prompt11
           </Button>
         </div>
       </div>
