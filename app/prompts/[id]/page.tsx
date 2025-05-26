@@ -126,6 +126,7 @@ If you don't receive the email within a few minutes, please check your spam fold
 
   // Add state for role search
   const [roleSearchQuery, setRoleSearchQuery] = useState("")
+  const [roleInput, setRoleInput] = useState("")
   const [guidelineSearchQuery, setGuidelineSearchQuery] = useState("")
   const [guardrailSearchQuery, setGuardrailSearchQuery] = useState("")
   const [contextSearchQuery, setContextSearchQuery] = useState("")
@@ -722,6 +723,8 @@ Support: support@example.com`
                     <Textarea
                       placeholder="Describe the AI's role and perspective"
                       rows={3}
+                      value={roleInput}
+                      onChange={(e) => setRoleInput(e.target.value)}
                     />
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
@@ -751,7 +754,12 @@ Support: support@example.com`
                                 <h5 className="font-medium">{role.name}</h5>
                                 <p className="text-sm text-muted-foreground">{role.description}</p>
                               </div>
-                              <Button variant="ghost" size="sm" className="h-8 w-8">
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="h-8 w-8"
+                                onClick={() => setRoleInput(role.description)}
+                              >
                                 <Plus className="h-4 w-4" />
                                 <span className="sr-only">Use role</span>
                               </Button>
