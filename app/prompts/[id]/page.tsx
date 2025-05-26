@@ -128,6 +128,16 @@ If you don't receive the email within a few minutes, please check your spam fold
 
   // Add state for role search
   const [roleSearchQuery, setRoleSearchQuery] = useState("")
+  const [guidelineSearchQuery, setGuidelineSearchQuery] = useState("")
+  const [guardrailSearchQuery, setGuardrailSearchQuery] = useState("")
+  const [contextSearchQuery, setContextSearchQuery] = useState("")
+  const [outputFormatSearchQuery, setOutputFormatSearchQuery] = useState("")
+  const [selfCheckSearchQuery, setSelfCheckSearchQuery] = useState("")
+
+  // Add state for context and output format
+  const [selectedContext, setSelectedContext] = useState("")
+  const [selectedOutputFormat, setSelectedOutputFormat] = useState("")
+  const [selfChecks, setSelfChecks] = useState<string[]>([])
 
   // Add mock data for roles
   const existingRoles = [
@@ -153,10 +163,190 @@ If you don't receive the email within a few minutes, please check your spam fold
     }
   ]
 
-  // Filter roles based on search query
+  // Add mock data for guidelines
+  const existingGuidelines = [
+    {
+      id: 1,
+      text: "Use a friendly, helpful tone",
+      category: "Tone"
+    },
+    {
+      id: 2,
+      text: "Keep responses concise but thorough",
+      category: "Style"
+    },
+    {
+      id: 3,
+      text: "Include relevant links to documentation when appropriate",
+      category: "Content"
+    },
+    {
+      id: 4,
+      text: "Avoid technical jargon unless necessary",
+      category: "Style"
+    },
+    {
+      id: 5,
+      text: "Format responses with clear headings and bullet points when needed",
+      category: "Format"
+    },
+    {
+      id: 6,
+      text: "Always acknowledge the user's question before answering",
+      category: "Tone"
+    },
+    {
+      id: 7,
+      text: "Provide step-by-step instructions for complex processes",
+      category: "Format"
+    }
+  ]
+
+  // Add mock data for guardrails
+  const existingGuardrails = [
+    {
+      id: 1,
+      text: "Never make up information about product features",
+      category: "Accuracy"
+    },
+    {
+      id: 2,
+      text: "Don't provide specific pricing information unless explicitly included in the prompt",
+      category: "Privacy"
+    },
+    {
+      id: 3,
+      text: "Avoid making promises about future features",
+      category: "Accuracy"
+    },
+    {
+      id: 4,
+      text: "Don't provide legal advice",
+      category: "Legal"
+    },
+    {
+      id: 5,
+      text: "Never share internal company information",
+      category: "Privacy"
+    },
+    {
+      id: 6,
+      text: "Don't provide medical advice",
+      category: "Legal"
+    },
+    {
+      id: 7,
+      text: "Avoid discussing competitor products",
+      category: "Business"
+    }
+  ]
+
+  // Add mock data for existing contexts
+  const existingContexts = [
+    {
+      id: 1,
+      text: "Customer support representatives who need to quickly generate accurate FAQ responses",
+      category: "Support"
+    },
+    {
+      id: 2,
+      text: "Technical writers creating product documentation",
+      category: "Documentation"
+    },
+    {
+      id: 3,
+      text: "Sales team members preparing product presentations",
+      category: "Sales"
+    },
+    {
+      id: 4,
+      text: "Marketing team creating social media content",
+      category: "Marketing"
+    }
+  ]
+
+  // Add mock data for output formats
+  const existingOutputFormats = [
+    {
+      id: 1,
+      text: "Structured FAQ response with a clear question heading, concise answer, and any relevant follow-up information or links",
+      category: "FAQ"
+    },
+    {
+      id: 2,
+      text: "Step-by-step guide with numbered instructions and optional tips",
+      category: "Guide"
+    },
+    {
+      id: 3,
+      text: "Bullet-point list with main points and sub-points",
+      category: "List"
+    },
+    {
+      id: 4,
+      text: "Detailed explanation with sections and subsections",
+      category: "Documentation"
+    }
+  ]
+
+  // Add mock data for self checks
+  const existingSelfChecks = [
+    {
+      id: 1,
+      text: "Is the response clear and easy to understand?",
+      category: "Clarity"
+    },
+    {
+      id: 2,
+      text: "Does it address all aspects of the question?",
+      category: "Completeness"
+    },
+    {
+      id: 3,
+      text: "Is the tone appropriate for the audience?",
+      category: "Tone"
+    },
+    {
+      id: 4,
+      text: "Are all technical terms explained?",
+      category: "Technical"
+    },
+    {
+      id: 5,
+      text: "Is the information accurate and up-to-date?",
+      category: "Accuracy"
+    }
+  ]
+
+  // Filter functions
   const filteredRoles = existingRoles.filter(role => 
     role.name.toLowerCase().includes(roleSearchQuery.toLowerCase()) ||
     role.description.toLowerCase().includes(roleSearchQuery.toLowerCase())
+  )
+
+  const filteredGuidelines = existingGuidelines.filter(guideline => 
+    guideline.text.toLowerCase().includes(guidelineSearchQuery.toLowerCase()) ||
+    guideline.category.toLowerCase().includes(guidelineSearchQuery.toLowerCase())
+  )
+
+  const filteredGuardrails = existingGuardrails.filter(guardrail => 
+    guardrail.text.toLowerCase().includes(guardrailSearchQuery.toLowerCase()) ||
+    guardrail.category.toLowerCase().includes(guardrailSearchQuery.toLowerCase())
+  )
+
+  const filteredContexts = existingContexts.filter(context => 
+    context.text.toLowerCase().includes(contextSearchQuery.toLowerCase()) ||
+    context.category.toLowerCase().includes(contextSearchQuery.toLowerCase())
+  )
+
+  const filteredOutputFormats = existingOutputFormats.filter(format => 
+    format.text.toLowerCase().includes(outputFormatSearchQuery.toLowerCase()) ||
+    format.category.toLowerCase().includes(outputFormatSearchQuery.toLowerCase())
+  )
+
+  const filteredSelfChecks = existingSelfChecks.filter(check => 
+    check.text.toLowerCase().includes(selfCheckSearchQuery.toLowerCase()) ||
+    check.category.toLowerCase().includes(selfCheckSearchQuery.toLowerCase())
   )
 
   const handleAddTag = () => {
@@ -459,11 +649,59 @@ Support: support@example.com`
                   </div>
                 </CardHeader>
                 {expandedCards.context && (
-                  <CardContent>
+                  <CardContent className="space-y-4">
                     <Textarea
                       placeholder="Describe the target audience for this prompt"
                       rows={3}
+                      value={selectedContext}
+                      onChange={(e) => setSelectedContext(e.target.value)}
                     />
+                    <div className="space-y-4 pt-4 border-t">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-sm font-medium">Existing Contexts</h4>
+                      </div>
+                      <div className="relative">
+                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          placeholder="Search contexts..."
+                          value={contextSearchQuery}
+                          onChange={(e) => setContextSearchQuery(e.target.value)}
+                          className="pl-8"
+                        />
+                      </div>
+                      <div className="grid gap-3">
+                        {filteredContexts.length > 0 ? (
+                          filteredContexts.map((context) => (
+                            <div
+                              key={context.id}
+                              className="flex items-start gap-3 p-3 rounded-lg border hover:border-primary/50 cursor-pointer transition-colors"
+                            >
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                  <h5 className="font-medium">{context.text}</h5>
+                                  <Badge variant="secondary" className="text-xs">
+                                    {context.category}
+                                  </Badge>
+                                </div>
+                              </div>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="h-8 w-8"
+                                onClick={() => setSelectedContext(context.text)}
+                              >
+                                <Plus className="h-4 w-4" />
+                                <span className="sr-only">Use context</span>
+                              </Button>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="text-center py-6 text-sm text-muted-foreground">
+                            No contexts found matching "{contextSearchQuery}"
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </CardContent>
                 )}
               </Card>
@@ -567,32 +805,85 @@ Support: support@example.com`
                 </CardHeader>
                 {expandedCards.guidelines && (
                   <CardContent className="space-y-4">
-                    <ul className="space-y-2">
-                      {guidelines.map((guideline, index) => (
-                        <li key={index} className="flex items-center gap-2">
-                          <div className="flex-1 bg-muted p-2 rounded-md">{guideline}</div>
-                          <Button variant="ghost" size="icon" onClick={() => removeGuideline(index)} className="h-8 w-8">
-                            <X className="h-4 w-4" />
-                            <span className="sr-only">Remove</span>
-                          </Button>
-                        </li>
-                      ))}
-                    </ul>
-                    <div className="flex gap-2">
-                      <Input
-                        placeholder="Add a guideline"
-                        value={guidelineInput}
-                        onChange={(e) => setGuidelineInput(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault()
-                            addGuideline()
-                          }
-                        }}
-                      />
-                      <Button type="button" size="sm" onClick={addGuideline}>
-                        Add
-                      </Button>
+                    <div className="space-y-4">
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Add a guideline"
+                          value={guidelineInput}
+                          onChange={(e) => setGuidelineInput(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault()
+                              addGuideline()
+                            }
+                          }}
+                        />
+                        <Button type="button" size="sm" onClick={addGuideline}>
+                          Add
+                        </Button>
+                      </div>
+                      <ul className="space-y-2">
+                        {guidelines.map((guideline, index) => (
+                          <li key={index} className="flex items-center gap-2">
+                            <div className="flex-1 bg-muted p-2 rounded-md">{guideline}</div>
+                            <Button variant="ghost" size="icon" onClick={() => removeGuideline(index)} className="h-8 w-8">
+                              <X className="h-4 w-4" />
+                              <span className="sr-only">Remove</span>
+                            </Button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="space-y-4 pt-4 border-t">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-sm font-medium">Existing Guidelines</h4>
+                      </div>
+                      <div className="relative">
+                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          placeholder="Search guidelines..."
+                          value={guidelineSearchQuery}
+                          onChange={(e) => setGuidelineSearchQuery(e.target.value)}
+                          className="pl-8"
+                        />
+                      </div>
+                      <div className="grid gap-3">
+                        {filteredGuidelines.length > 0 ? (
+                          filteredGuidelines.map((guideline) => (
+                            <div
+                              key={guideline.id}
+                              className="flex items-start gap-3 p-3 rounded-lg border hover:border-primary/50 cursor-pointer transition-colors"
+                            >
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                  <h5 className="font-medium">{guideline.text}</h5>
+                                  <Badge variant="secondary" className="text-xs">
+                                    {guideline.category}
+                                  </Badge>
+                                </div>
+                              </div>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="h-8 w-8"
+                                onClick={() => {
+                                  if (!guidelines.includes(guideline.text)) {
+                                    setGuidelines([...guidelines, guideline.text])
+                                  }
+                                }}
+                              >
+                                <Plus className="h-4 w-4" />
+                                <span className="sr-only">Add guideline</span>
+                              </Button>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="text-center py-6 text-sm text-muted-foreground">
+                            No guidelines found matching "{guidelineSearchQuery}"
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </CardContent>
                 )}
@@ -612,32 +903,85 @@ Support: support@example.com`
                 </CardHeader>
                 {expandedCards.guardrails && (
                   <CardContent className="space-y-4">
-                    <ul className="space-y-2">
-                      {guardrails.map((guardrail, index) => (
-                        <li key={index} className="flex items-center gap-2">
-                          <div className="flex-1 bg-muted p-2 rounded-md">{guardrail}</div>
-                          <Button variant="ghost" size="icon" onClick={() => removeGuardrail(index)} className="h-8 w-8">
-                            <X className="h-4 w-4" />
-                            <span className="sr-only">Remove</span>
-                          </Button>
-                        </li>
-                      ))}
-                    </ul>
-                    <div className="flex gap-2">
-                      <Input
-                        placeholder="Add a guardrail"
-                        value={guardrailInput}
-                        onChange={(e) => setGuardrailInput(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault()
-                            addGuardrail()
-                          }
-                        }}
-                      />
-                      <Button type="button" size="sm" onClick={addGuardrail}>
-                        Add
-                      </Button>
+                    <div className="space-y-4">
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Add a guardrail"
+                          value={guardrailInput}
+                          onChange={(e) => setGuardrailInput(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault()
+                              addGuardrail()
+                            }
+                          }}
+                        />
+                        <Button type="button" size="sm" onClick={addGuardrail}>
+                          Add
+                        </Button>
+                      </div>
+                      <ul className="space-y-2">
+                        {guardrails.map((guardrail, index) => (
+                          <li key={index} className="flex items-center gap-2">
+                            <div className="flex-1 bg-muted p-2 rounded-md">{guardrail}</div>
+                            <Button variant="ghost" size="icon" onClick={() => removeGuardrail(index)} className="h-8 w-8">
+                              <X className="h-4 w-4" />
+                              <span className="sr-only">Remove</span>
+                            </Button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="space-y-4 pt-4 border-t">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-sm font-medium">Existing Guardrails</h4>
+                      </div>
+                      <div className="relative">
+                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          placeholder="Search guardrails..."
+                          value={guardrailSearchQuery}
+                          onChange={(e) => setGuardrailSearchQuery(e.target.value)}
+                          className="pl-8"
+                        />
+                      </div>
+                      <div className="grid gap-3">
+                        {filteredGuardrails.length > 0 ? (
+                          filteredGuardrails.map((guardrail) => (
+                            <div
+                              key={guardrail.id}
+                              className="flex items-start gap-3 p-3 rounded-lg border hover:border-primary/50 cursor-pointer transition-colors"
+                            >
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                  <h5 className="font-medium">{guardrail.text}</h5>
+                                  <Badge variant="secondary" className="text-xs">
+                                    {guardrail.category}
+                                  </Badge>
+                                </div>
+                              </div>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="h-8 w-8"
+                                onClick={() => {
+                                  if (!guardrails.includes(guardrail.text)) {
+                                    setGuardrails([...guardrails, guardrail.text])
+                                  }
+                                }}
+                              >
+                                <Plus className="h-4 w-4" />
+                                <span className="sr-only">Add guardrail</span>
+                              </Button>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="text-center py-6 text-sm text-muted-foreground">
+                            No guardrails found matching "{guardrailSearchQuery}"
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </CardContent>
                 )}
@@ -656,11 +1000,59 @@ Support: support@example.com`
                   </div>
                 </CardHeader>
                 {expandedCards.outputFormat && (
-                  <CardContent>
+                  <CardContent className="space-y-4">
                     <Textarea
                       placeholder="Describe the desired output format"
                       rows={3}
+                      value={selectedOutputFormat}
+                      onChange={(e) => setSelectedOutputFormat(e.target.value)}
                     />
+                    <div className="space-y-4 pt-4 border-t">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-sm font-medium">Existing Output Formats</h4>
+                      </div>
+                      <div className="relative">
+                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          placeholder="Search output formats..."
+                          value={outputFormatSearchQuery}
+                          onChange={(e) => setOutputFormatSearchQuery(e.target.value)}
+                          className="pl-8"
+                        />
+                      </div>
+                      <div className="grid gap-3">
+                        {filteredOutputFormats.length > 0 ? (
+                          filteredOutputFormats.map((format) => (
+                            <div
+                              key={format.id}
+                              className="flex items-start gap-3 p-3 rounded-lg border hover:border-primary/50 cursor-pointer transition-colors"
+                            >
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                  <h5 className="font-medium">{format.text}</h5>
+                                  <Badge variant="secondary" className="text-xs">
+                                    {format.category}
+                                  </Badge>
+                                </div>
+                              </div>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="h-8 w-8"
+                                onClick={() => setSelectedOutputFormat(format.text)}
+                              >
+                                <Plus className="h-4 w-4" />
+                                <span className="sr-only">Use format</span>
+                              </Button>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="text-center py-6 text-sm text-muted-foreground">
+                            No output formats found matching "{outputFormatSearchQuery}"
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </CardContent>
                 )}
               </Card>
@@ -700,11 +1092,104 @@ Support: support@example.com`
                   </div>
                 </CardHeader>
                 {expandedCards.selfCheck && (
-                  <CardContent>
-                    <Textarea
-                      placeholder="Describe the target audience for this prompt"
-                      rows={3}
-                    />
+                  <CardContent className="space-y-4">
+                    <div className="space-y-4">
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Add a self check question"
+                          value={selfCheckInput}
+                          onChange={(e) => setSelfCheckInput(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault()
+                              if (selfCheckInput.trim() && !selfChecks.includes(selfCheckInput.trim())) {
+                                setSelfChecks([...selfChecks, selfCheckInput.trim()])
+                                setSelfCheckInput("")
+                              }
+                            }
+                          }}
+                        />
+                        <Button 
+                          type="button" 
+                          size="sm" 
+                          onClick={() => {
+                            if (selfCheckInput.trim() && !selfChecks.includes(selfCheckInput.trim())) {
+                              setSelfChecks([...selfChecks, selfCheckInput.trim()])
+                              setSelfCheckInput("")
+                            }
+                          }}
+                        >
+                          Add
+                        </Button>
+                      </div>
+                      <ul className="space-y-2">
+                        {selfChecks.map((check, index) => (
+                          <li key={index} className="flex items-center gap-2">
+                            <div className="flex-1 bg-muted p-2 rounded-md">{check}</div>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              onClick={() => setSelfChecks(selfChecks.filter((_, i) => i !== index))} 
+                              className="h-8 w-8"
+                            >
+                              <X className="h-4 w-4" />
+                              <span className="sr-only">Remove</span>
+                            </Button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="space-y-4 pt-4 border-t">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-sm font-medium">Existing Self Checks</h4>
+                      </div>
+                      <div className="relative">
+                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          placeholder="Search self checks..."
+                          value={selfCheckSearchQuery}
+                          onChange={(e) => setSelfCheckSearchQuery(e.target.value)}
+                          className="pl-8"
+                        />
+                      </div>
+                      <div className="grid gap-3">
+                        {filteredSelfChecks.length > 0 ? (
+                          filteredSelfChecks.map((check) => (
+                            <div
+                              key={check.id}
+                              className="flex items-start gap-3 p-3 rounded-lg border hover:border-primary/50 cursor-pointer transition-colors"
+                            >
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                  <h5 className="font-medium">{check.text}</h5>
+                                  <Badge variant="secondary" className="text-xs">
+                                    {check.category}
+                                  </Badge>
+                                </div>
+                              </div>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="h-8 w-8"
+                                onClick={() => {
+                                  if (!selfChecks.includes(check.text)) {
+                                    setSelfChecks([...selfChecks, check.text])
+                                  }
+                                }}
+                              >
+                                <Plus className="h-4 w-4" />
+                                <span className="sr-only">Add self check</span>
+                              </Button>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="text-center py-6 text-sm text-muted-foreground">
+                            No self checks found matching "{selfCheckSearchQuery}"
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </CardContent>
                 )}
               </Card>
