@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { ArrowLeft, Plus, X, Save, Send, Sparkles, BookTemplate, Loader2, Copy, Check, Clock, MessageSquare, Pencil, ChevronDown, ChevronUp } from "lucide-react"
+import { ArrowLeft, Plus, X, Save, Send, Sparkles, BookTemplate, Loader2, Copy, Check, Clock, MessageSquare, Pencil, ChevronDown, ChevronUp, Search } from "lucide-react"
 import { llms } from "@/app/data/llms"
 import { LLM, LLMId } from "@/app/types/llm"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -126,6 +126,9 @@ If you don't receive the email within a few minutes, please check your spam fold
     selfCheck: false
   })
 
+  // Add state for role search
+  const [roleSearchQuery, setRoleSearchQuery] = useState("")
+
   // Add mock data for roles
   const existingRoles = [
     {
@@ -149,6 +152,12 @@ If you don't receive the email within a few minutes, please check your spam fold
       description: "A persuasive communicator who helps customers understand product benefits and make informed decisions."
     }
   ]
+
+  // Filter roles based on search query
+  const filteredRoles = existingRoles.filter(role => 
+    role.name.toLowerCase().includes(roleSearchQuery.toLowerCase()) ||
+    role.description.toLowerCase().includes(roleSearchQuery.toLowerCase())
+  )
 
   const handleAddTag = () => {
     if (newTag.trim() && !tags.includes(newTag.trim())) {
@@ -485,22 +494,37 @@ Support: support@example.com`
                           Add New Role
                         </Button>
                       </div>
+                      <div className="relative">
+                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          placeholder="Search roles..."
+                          value={roleSearchQuery}
+                          onChange={(e) => setRoleSearchQuery(e.target.value)}
+                          className="pl-8"
+                        />
+                      </div>
                       <div className="grid gap-3">
-                        {existingRoles.map((role) => (
-                          <div
-                            key={role.id}
-                            className="flex items-start gap-3 p-3 rounded-lg border hover:border-primary/50 cursor-pointer transition-colors"
-                          >
-                            <div className="flex-1">
-                              <h5 className="font-medium">{role.name}</h5>
-                              <p className="text-sm text-muted-foreground">{role.description}</p>
+                        {filteredRoles.length > 0 ? (
+                          filteredRoles.map((role) => (
+                            <div
+                              key={role.id}
+                              className="flex items-start gap-3 p-3 rounded-lg border hover:border-primary/50 cursor-pointer transition-colors"
+                            >
+                              <div className="flex-1">
+                                <h5 className="font-medium">{role.name}</h5>
+                                <p className="text-sm text-muted-foreground">{role.description}</p>
+                              </div>
+                              <Button variant="ghost" size="sm" className="h-8 w-8">
+                                <Plus className="h-4 w-4" />
+                                <span className="sr-only">Use role</span>
+                              </Button>
                             </div>
-                            <Button variant="ghost" size="sm" className="h-8 w-8">
-                              <Plus className="h-4 w-4" />
-                              <span className="sr-only">Use role</span>
-                            </Button>
+                          ))
+                        ) : (
+                          <div className="text-center py-6 text-sm text-muted-foreground">
+                            No roles found matching "{roleSearchQuery}"
                           </div>
-                        ))}
+                        )}
                       </div>
                     </div>
                   </CardContent>
