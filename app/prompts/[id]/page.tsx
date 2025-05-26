@@ -138,6 +138,7 @@ If you don't receive the email within a few minutes, please check your spam fold
   const [selectedContext, setSelectedContext] = useState("")
   const [selectedOutputFormat, setSelectedOutputFormat] = useState("")
   const [selfChecks, setSelfChecks] = useState<string[]>([])
+  const [selfCheckInput, setSelfCheckInput] = useState("")
 
   // Add mock data for roles
   const existingRoles = [
