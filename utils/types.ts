@@ -29,4 +29,26 @@ export interface Llm {
     description?: string;
 }
 
+export interface PromptComponent {
+    id?: number;
+    component_type: PromptComponentType;
+    name?: string;
+    description?: string;
+    user_id?: string | null; // null for default/system-defined components
+    tags?: string[];
+    usageCount?: number;
+    created_at: string; // ISO timestamp
+    is_default: boolean;
+}
+
 export type PromptStatus = 'Draft' | 'Submitted' | 'Approved'; 
+
+export type PromptComponentType = 
+'Context' | 
+'Role' | 
+'Task Instruction' | 
+'Guidelines' | 
+'Guardrails' | 
+'Output Format' | 
+'Output Example' | 
+'Self Check';

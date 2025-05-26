@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { use, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -18,11 +18,13 @@ import { AlertCircle } from "lucide-react"
 import { toast } from "sonner"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
-export default function NewPromptPage({ params }: { params: { id: string } }) {
+export default function NewPromptPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params)  // ✅ unwrap the promise
+
 
   const prompt = {
     id: 1,
-    // id: params.id,
+    // id: id,
     title: "Customer Support FAQ Generator",
     status: "Submitted",
     tags: ["Support", "FAQ"],
@@ -95,7 +97,7 @@ If you don't receive the email within a few minutes, please check your spam fold
   }
 
   
-  const [tags, setTags] = useState<string[]>(params.id === "new" ? [] : prompt.tags)
+  const [tags, setTags] = useState<string[]>(id === "new" ? [] : prompt.tags)
   const [isAddingTag, setIsAddingTag] = useState(false)
   const [newTag, setNewTag] = useState("")
   const [guidelines, setGuidelines] = useState<string[]>([
@@ -112,7 +114,7 @@ If you don't receive the email within a few minutes, please check your spam fold
   const [finalResponse, setFinalResponse] = useState("")
   const [copiedLLM, setCopiedLLM] = useState<LLMId | null>(null)
   const [isEditingTitle, setIsEditingTitle] = useState(false)
-  const [promptTitle, setPromptTitle] = useState(params.id === "new" ? "Prompt Name" : prompt.title)
+  const [promptTitle, setPromptTitle] = useState(id === "new" ? "Prompt Name" : prompt.title)
 
   const handleAddTag = () => {
     if (newTag.trim() && !tags.includes(newTag.trim())) {
