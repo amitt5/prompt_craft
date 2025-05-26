@@ -1574,58 +1574,6 @@ Support: support@example.com`
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg">Saved Components</CardTitle>
-              <CardDescription>Reuse components from your library</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Guidelines</label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select saved guidelines" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="support">Support Guidelines</SelectItem>
-                    <SelectItem value="marketing">Marketing Guidelines</SelectItem>
-                    <SelectItem value="technical">Technical Guidelines</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Guardrails</label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select saved guardrails" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="standard">Standard Guardrails</SelectItem>
-                    <SelectItem value="legal">Legal Guardrails</SelectItem>
-                    <SelectItem value="privacy">Privacy Guardrails</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Output Formats</label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select saved format" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="faq">FAQ Format</SelectItem>
-                    <SelectItem value="step">Step-by-Step Format</SelectItem>
-                    <SelectItem value="bullet">Bullet Points Format</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <Separator />
-              <Button variant="outline" className="w-full">
-                <Plus className="mr-2 h-4 w-4" />
-                Manage Components
-              </Button>
-            </CardContent>
-          </Card>
 
           <Card>
             <CardHeader className="pb-2">
