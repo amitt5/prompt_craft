@@ -30,15 +30,15 @@ export interface Llm {
 }
 
 export interface PromptComponent {
-    id?: number;
+    id?: string;
     component_type: PromptComponentType;
     name?: string;
     description?: string;
     user_id?: string | null; // null for default/system-defined components
-    tags?: string[];
+    tags?: string[] | null;
     usageCount?: number;
-    created_at: string; // ISO timestamp
-    is_default: boolean;
+    created_at?: string | null; // ISO timestamp
+    is_default?: boolean;
 }
 
 export type PromptStatus = 'Draft' | 'Submitted' | 'Approved'; 
