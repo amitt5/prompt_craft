@@ -117,14 +117,38 @@ If you don't receive the email within a few minutes, please check your spam fold
   const [promptTitle, setPromptTitle] = useState(id === "new" ? "Prompt Name" : prompt.title)
   const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({
     context: true,
-    role: true,
-    taskInstruction: true,
-    guidelines: true,
-    guardrails: true,
-    outputFormat: true,
-    example: true,
-    selfCheck: true
+    role: false,
+    taskInstruction: false,
+    guidelines: false,
+    guardrails: false,
+    outputFormat: false,
+    example: false,
+    selfCheck: false
   })
+
+  // Add mock data for roles
+  const existingRoles = [
+    {
+      id: 1,
+      name: "Customer Support Agent",
+      description: "A friendly and helpful support representative who provides clear, concise solutions to customer inquiries."
+    },
+    {
+      id: 2,
+      name: "Technical Expert",
+      description: "A knowledgeable technical specialist who provides detailed, accurate technical guidance and solutions."
+    },
+    {
+      id: 3,
+      name: "Product Specialist",
+      description: "An expert in product features and capabilities who helps users maximize the value of the product."
+    },
+    {
+      id: 4,
+      name: "Sales Representative",
+      description: "A persuasive communicator who helps customers understand product benefits and make informed decisions."
+    }
+  ]
 
   const handleAddTag = () => {
     if (newTag.trim() && !tags.includes(newTag.trim())) {
@@ -448,11 +472,37 @@ Support: support@example.com`
                   </div>
                 </CardHeader>
                 {expandedCards.role && (
-                  <CardContent>
+                  <CardContent className="space-y-4">
                     <Textarea
                       placeholder="Describe the AI's role and perspective"
                       rows={3}
                     />
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-sm font-medium">Existing Roles</h4>
+                        <Button variant="ghost" size="sm" className="h-8">
+                          <Plus className="h-4 w-4 mr-1" />
+                          Add New Role
+                        </Button>
+                      </div>
+                      <div className="grid gap-3">
+                        {existingRoles.map((role) => (
+                          <div
+                            key={role.id}
+                            className="flex items-start gap-3 p-3 rounded-lg border hover:border-primary/50 cursor-pointer transition-colors"
+                          >
+                            <div className="flex-1">
+                              <h5 className="font-medium">{role.name}</h5>
+                              <p className="text-sm text-muted-foreground">{role.description}</p>
+                            </div>
+                            <Button variant="ghost" size="sm" className="h-8 w-8">
+                              <Plus className="h-4 w-4" />
+                              <span className="sr-only">Use role</span>
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </CardContent>
                 )}
               </Card>
